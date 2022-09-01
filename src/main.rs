@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash};
+use std::{collections::HashMap, hash::Hash, ptr::from_raw_parts_mut};
 
 fn main() {
     let mut data = vec![1, 2, 3, 4, 5];
@@ -153,6 +153,22 @@ trait Dog: Animal {
 }
 fn love(pet: dyn Animal) {
     pet.snuggle();
+}
+///Splitting borrows
+pub fn split_at_mut(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
+    let len = self.len();
+    let ptr = self.as_mut_ptr();
+    unsafe {
+        assert!(mid <= len);
+        (
+            from_raw_parts_mut(ptr, mid),
+            from_raw_parts_mut(mid, len - mid),
+        )
+    }
+}
+trait Iterator {
+    type Item;
+    fn next(&mut self) -> Option<Self::Item>;
 }
 #[cfg(test)]
 mod test {
