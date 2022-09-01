@@ -1,4 +1,4 @@
-use std::fmt::format;
+use std::{collections::HashMap, hash::Hash};
 
 fn main() {
     let mut data = vec![1, 2, 3, 4, 5];
@@ -7,6 +7,11 @@ fn main() {
     //This code does not compile because rust does not allow inmutable shared mutable reference
     data.push(7);
     print!("{}", x);
+
+    let mut foo = Foo;
+    let loan = foo.mutate_and_share();
+    foo.share();
+    println!("{:?}", loan);
 }
 
 //(THis code does not compile)
@@ -24,7 +29,7 @@ fn compute(input: &u32, output: &mut u32) {
     if *input > 5 {
         *output *= 2;
     }
-    //Remember that `output` will be `2` if `input >10`
+    //Remember that `output` will be `2` if `input >10;`
 }
 
 fn compute_optimize(input: &u32, output: &mut u32) {
@@ -64,12 +69,37 @@ fn kk() {
     println!("{}", x);
     data.push(7874);
 }
-#[derive(deBug)]
+#[derive(Debug)]
 struct X<'a>(&'a i32);
 impl Drop for X<'_> {
     fn drop(&mut self) {}
 }
 
+//Limit lifetime
+#[derive(Debug)]
+struct Foo;
+impl Foo {
+    fn mutate_and_share(&mut self) -> &Self {
+        &*&Self
+    }
+    fn share(&self) {
+        //
+    }
+}
+//Improperly reduced borrows
+fn get_default<'a, K, V>(map: &'a mut HashMap<K, V>, key: K) -> &'a mut V
+where
+    K: Clone + Eq + Hash,
+    V: Default,
+{
+    match map.get_mut(&key) {
+        Some(value) => value,
+        None => {
+            map.insert(key.clone(), V::default());
+            map.get_mut(&key).unwrap()
+        }
+    }
+}
 #[cfg(test)]
 mod test {
     use super::*;
