@@ -121,6 +121,20 @@ where
 fn do_it(data: &(u8, u16)) -> &u8 {
     &data.0
 }
+//Subtyping and Variance
+trait Animal {
+    fn snuggle(&self);
+    fn eat(&mut self);
+}
+trait Cat: Animal {
+    fn meow(&self);
+}
+trait Dog: Animal {
+    fn bark(&self);
+}
+fn love(pet: dyn Animal) {
+    pet.snuggle();
+}
 #[cfg(test)]
 mod test {
     use super::*;
